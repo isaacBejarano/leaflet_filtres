@@ -1,36 +1,106 @@
 "use strict";
 
-import "../models/Fetch"; // Fetch module
+import "../models/Fetch"; // Fetch class
+import "./ajax"; // fetch logic
 import "../../sass/main.scss"; // SASS module
+import Restaurant from "../models/Fetch";
 
-var map = L.map("mapid").on("load", onMapLoad).setView([41.4, 2.206], 9);
+const mapBCN = L.map("mapBCN").on("load", onMapLoad).setView([41.4, 2.206], 9);
 //map.locate({setView: true, maxZoom: 17});
 
-var tiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {}).addTo(map);
+const tiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {}).addTo(mapBCN);
 
-//en el clusters almaceno todos los markers
-var markers = L.markerClusterGroup();
-var data_markers = [];
+// cluster of markers
+let cluster = L.markerClusterGroup();
 
+let data_markers = []; // Restaurant[]
+
+/* ON LOAD */
 function onMapLoad() {
-	console.log("Mapa cargado");
-	/*
-	FASE 3.1
-		1) Relleno el data_markers con una petición a la api
-		2) Añado de forma dinámica en el select los posibles tipos de restaurantes
-		3) Llamo a la función para --> render_to_map(data_markers, 'all'); <-- para mostrar restaurantes en el mapa
-	*/
+	// AJAX
+	$(() => {
+		// XHR request
+		$.ajax({
+			type: "GET",
+			url: "http://localhost/mapa/api/restaurants.php",
+			dataType: "json",
+			success: response => {
+				for (let res of response) {
+					// 3.1.1 Restaurant instances
+					new Restaurant(
+						// prettier-ignore
+						res.id_restaurant,
+						res.name,
+						res.address,
+						res.kind_food,
+						res.lat,
+						res.lng
+					);
+				}
+
+				data_markers = Restaurant.getList; // 3.1.1 fill up
+
+				// 3.1.2 dynamic <select>
+				let inputSelect = document.getElementById("kind_food_selector");
+
+				// SET (don't repeat kinds)
+				let kinda = new Set();
+
+				for (let restaurant of Restaurant.getList) {
+					kinda.add(restaurant.getKind);
+				}
+
+				for (let kind of kinda.keys()) {
+					// HTML append
+					const option = document.createElement("option");
+					inputSelect.append(option);
+					// data inject
+					option.value = kind;
+					option.textContent = kind;
+					// CSS
+					option.classList.add("bg-dark", "text-light", "font-weight-lighter");
+				}
+
+				// 3.1.3 show all markers
+				render_to_map("all");
+			},
+			error: (xhr, status, error) => {
+				console.log(xhr, status, error);
+			},
+		});
+	});
 }
 
+/* EVENT */
 $("#kind_food_selector").on("change", function () {
-	console.log(this.value);
-	render_to_map(data_markers, this.value);
+	render_to_map(this.value);
 });
 
-function render_to_map(data_markers, filter) {
-	/*
-	FASE 3.2
-		1) Limpio todos los marcadores
-		2) Realizo un bucle para decidir que marcadores cumplen el filtro, y los agregamos al mapa
-	*/
+/* LIB */
+function render_to_map(filtro) {
+	// 3.2.1
+	cluster.clearLayers(); // clear cluster
+
+	// 3.2.2
+	let filtered = [];
+
+	// filter restaurants to mark
+	if (filtro === "all") filtered = data_markers;
+	else filtered = data_markers.filter(data => data.getKind == filtro);
+
+	// update cluster with filtered markers
+	for (let data of filtered) {
+		let marker = L.marker(data.getCoordinates).bindPopup(`
+			<b class="d-block">${data.getName}</b>
+			<span class="d-block  pb-2">${data.getKind}</span>
+			<span class="d-block">${data.getAddress}</span>
+			`);
+
+		cluster.addLayer(marker);
+	}
+
+	// render cluster
+	mapBCN.addLayer(cluster);
+
+	// CENTER CLUSTER SETVIEW !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }

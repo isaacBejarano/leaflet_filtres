@@ -1,7 +1,9 @@
 <html>
 	<head>
 		<meta charset="UTF-8" />
-		<title>Filtered Leaflet</title>
+		<title>Restopolitan BCN</title>
+		<!-- favicon -->
+		<link rel="icon" type="image/png" href="../assets/restaurant.ico" />
 		<!-- Bootstrap CSS -->
 		<link
 			rel="stylesheet"
@@ -9,7 +11,15 @@
 			integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
 			crossorigin="anonymous"
 		/>
-		<!-- libraries CSS -->
+		<!-- Font Awesome Icons -->
+		<link
+			rel="stylesheet"
+			href="https://use.fontawesome.com/releases/v5.1.1/css/all.css"
+			integrity="sha384-O8whS3fhG2OnA5Kas0Y9l3cfpmYjapjI0E4theH4iuMD+pLhbf6JI0jIMfYcK3yZ"
+			crossorigin="anonymous"
+		/>
+
+		<!-- Leaflet + MarkerCluster CSS -->
 		<link
 			rel="stylesheet"
 			href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
@@ -19,29 +29,41 @@
 		<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
 		<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 
-		<!-- custom SASS - webpacked -->
+		<!-- custom SASS - ...webpacked -->
 	</head>
 
-	<body>
-		<h1>Filtered Leaflet</h1>
-		<div class="">
-			<p>
-				Type of restaurants:
-				<span>
-					<select id="kind_food_selector">
-						<optgroup>
-							<option value="restaurant1">{{ restaurant 1 }}</option>
-						</optgroup>
+	<body class="container-fluid text-light">
+		<header class="mt-5 p-5 bg-dark shadow">
+			<h1 class="display-4 font-weight-lighter">Restopolitan BCN</h1>
+			<h2 class="h4 font-weight-lighter">Restaurants near Barcelona City</h2>
+		</header>
+
+		<main class="mt-5">
+			<form action="#" class="w-50 shadow">
+				<div class="input-group mb-3">
+					<!-- prepend -->
+					<div class="input-group-append bg-dark px-2 rounded-left">
+						<i class="fas fa-filter text-light my-auto"></i>
+					</div>
+					<!-- outlet - select -->
+					<select id="kind_food_selector" class="custom-select">
+						<option selected disabled>Select restaurants by...</option>
+						<!-- outlet - options -->
 					</select>
-				</span>
-			</p>
-		</div>
+					<!-- append -->
+					<div class="input-group-append">
+						<label class="input-group-text font-weight-lighter text-light bg-dark" for="kind_food_selector">
+							kind of food
+						</label>
+					</div>
+				</div>
+			</form>
 
-		<div id="mapid" class=""></div>
+			<!-- Map -->
+			<div id="mapBCN" class="mt-5 border border-dark shadow"></div>
+		</main>
 
-		
-
-		<!-- libraries JS -->
+		<!-- Leaflet + MarkerCluster JS -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 		<script
 			src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
@@ -50,6 +72,6 @@
 		></script>
 		<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
-		<!-- custom JS - webpacked -->
+		<!-- custom JS - ...webpacked -->
 	</body>
 </html>

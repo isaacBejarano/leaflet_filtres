@@ -1,44 +1,62 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-console.log("Fetch loaded");
-var Fetch = /** @class */ (function () {
-    function Fetch(URL, action) {
-        if (action === void 0) { action = "get"; }
-        this.URL = URL;
-        this.action = action;
-        Fetch.list.push(this);
+var Restaurant = /** @class */ (function () {
+    // prettier-ignore
+    function Restaurant(id, name, address, kind, lat, lng) {
+        this.id = id;
+        this.name = name;
+        this.address = address;
+        this.kind = kind;
+        this.lat = lat;
+        this.lng = lng;
+        this.coordinates = [this.lat, this.lng];
+        Restaurant.list.push(this);
     }
-    Object.defineProperty(Fetch.prototype, "setURL", {
-        // setters
-        set: function (url) {
-            this.URL = url;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    Object.defineProperty(Fetch.prototype, "getURL", {
-        // getters
-        get: function () {
-            return this.URL;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    Object.defineProperty(Fetch.prototype, "getAction", {
-        get: function () {
-            return this.action;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    Object.defineProperty(Fetch, "getList", {
+    Object.defineProperty(Restaurant, "getList", {
         // static
         get: function () {
-            return Fetch.list;
+            return Restaurant.list;
         },
         enumerable: false,
         configurable: true
     });
-    return Fetch;
+    Object.defineProperty(Restaurant.prototype, "getId", {
+        // getters
+        get: function () {
+            return this.id;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Restaurant.prototype, "getName", {
+        get: function () {
+            return this.name;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Restaurant.prototype, "getKind", {
+        get: function () {
+            return this.kind;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Restaurant.prototype, "getAddress", {
+        get: function () {
+            return this.address;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Restaurant.prototype, "getCoordinates", {
+        get: function () {
+            return this.coordinates;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Restaurant.list = [];
+    return Restaurant;
 }());
-exports.default = Fetch;
+exports.default = Restaurant;

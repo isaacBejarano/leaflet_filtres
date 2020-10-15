@@ -1,27 +1,43 @@
-console.log("Fetch loaded");
+export default class Restaurant {
+	private static list: Restaurant[] = [];
+	private coordinates: [number, number];
 
-export default class Fetch {
-	private static list: Fetch[];
-
-	constructor(private URL: string, private action = "get") {
-		Fetch.list.push(this);
-	}
-	// setters
-	set setURL(url: string) {
-		this.URL = url;
-	}
-
-	// getters
-	get getURL(): string {
-		return this.URL;
-	}
-
-	get getAction(): string {
-		return this.action;
+	// prettier-ignore
+	constructor(
+		private readonly id: number,
+		private readonly name: string,
+		private readonly address: string,
+		private readonly kind: string,
+		private readonly lat: number,
+		private readonly lng: number,
+	) {
+		this.coordinates = [this.lat, this.lng];
+		Restaurant.list.push(this);
 	}
 
 	// static
 	static get getList() {
-		return Fetch.list;
+		return Restaurant.list;
+	}
+
+	// getters
+	get getId() {
+		return this.id;
+	}
+
+	get getName() {
+		return this.name;
+	}
+
+	get getKind() {
+		return this.kind;
+	}
+
+	get getAddress() {
+		return this.address;
+	}
+
+	get getCoordinates(): [number, number] {
+		return this.coordinates;
 	}
 }
