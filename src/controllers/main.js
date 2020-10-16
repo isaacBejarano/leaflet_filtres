@@ -1,28 +1,34 @@
 "use strict";
 
-import "../models/Fetch"; // Fetch class
-import "./ajax"; // fetch logic
+import Restaurant from "../models/Restaurant.js"; // JS class
 import "../../sass/main.scss"; // SASS module
-import Restaurant from "../models/Fetch";
 
-const mapBCN = L.map("mapBCN").on("load", onMapLoad).setView([41.4, 2.206], 9);
-//map.locate({setView: true, maxZoom: 17});
+const startZoom = 9;
+const mapCenter = [41.4, 2.206];
+const mapBCN = L.map("mapBCN").on("load", onMapLoad).setView(mapCenter, startZoom);
+const cluster = L.markerClusterGroup();
+let restaurants = []; // Restaurant[]
+let currentCoordinates = []; // to update setView
+const selector = document.getElementById("kind_food_selector");
+const disabledOption = document.querySelector(`#${selector.id} > option:first-child`);
+const disabledOptionText = "Select restaurants by..";
+const tilesURL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+const attribution = '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors';
+let toggleAll = false;
 
-const tiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {}).addTo(mapBCN);
+disabledOption.textContent = disabledOptionText; // <select>
 
-// cluster of markers
-let cluster = L.markerClusterGroup();
+// tiles
+L.tileLayer(tilesURL, { attribution }).addTo(mapBCN);
 
-let data_markers = []; // Restaurant[]
-
-/* ON LOAD */
+/* XHR - onload */
 function onMapLoad() {
 	// AJAX
 	$(() => {
 		// XHR request
 		$.ajax({
 			type: "GET",
-			url: "http://localhost/mapa/api/restaurants.php",
+			url: "http://localhost/map/api/restaurants.php",
 			dataType: "json",
 			success: response => {
 				for (let res of response) {
@@ -33,24 +39,23 @@ function onMapLoad() {
 						res.name,
 						res.address,
 						res.kind_food,
-						res.lat,
-						res.lng
+						+res.lat, // parsed int
+						+res.lng // parsed int
 					);
 				}
 
-				data_markers = Restaurant.getList; // 3.1.1 fill up
+				// 3.1.1 fill up
+				restaurants = Restaurant.getList;
 
 				// 3.1.2 dynamic <select>
 				let inputSelect = document.getElementById("kind_food_selector");
-
-				// SET (don't repeat kinds)
-				let kinda = new Set();
+				let kinds = new Set(); // don't repeat kinds
 
 				for (let restaurant of Restaurant.getList) {
-					kinda.add(restaurant.getKind);
+					kinds.add(restaurant.getKind);
 				}
 
-				for (let kind of kinda.keys()) {
+				for (let kind of kinds.keys()) {
 					// HTML append
 					const option = document.createElement("option");
 					inputSelect.append(option);
@@ -71,36 +76,74 @@ function onMapLoad() {
 	});
 }
 
-/* EVENT */
-$("#kind_food_selector").on("change", function () {
+/* EVENTS */
+
+// <select> -> filter
+$(selector).on("change", function () {
+	toggleAll = false; // default
 	render_to_map(this.value);
 });
 
-/* LIB */
-function render_to_map(filtro) {
-	// 3.2.1
-	cluster.clearLayers(); // clear cluster
+// <button> -> toggle all
+$("#btn-show-all").on("click", function () {
+	if (selector.value !== disabledOptionText) {
+		toggleAll = !toggleAll;
+		toggleAll ? render_to_map("all") : render_to_map(selector.value);
+	}
+});
 
-	// 3.2.2
+/* LIB */
+
+function render_to_map(filtro) {
 	let filtered = [];
 
-	// filter restaurants to mark
-	if (filtro === "all") filtered = data_markers;
-	else filtered = data_markers.filter(data => data.getKind == filtro);
+	// 3.2.1 clear cluster
+	cluster.clearLayers();
 
-	// update cluster with filtered markers
-	for (let data of filtered) {
-		let marker = L.marker(data.getCoordinates).bindPopup(`
-			<b class="d-block">${data.getName}</b>
-			<span class="d-block  pb-2">${data.getKind}</span>
-			<span class="d-block">${data.getAddress}</span>
+	// 3.2.2 filter restaurants + update cluster of markers
+	if (filtro === "all") filtered = restaurants;
+	else filtered = restaurants.filter(data => data.getKind === filtro);
+
+	for (let restaurant of filtered) {
+		let marker = L.marker(restaurant.getCoordinates).bindPopup(`
+			<b class="d-block">${restaurant.getName}</b>
+			<span class="d-block  pb-2">${restaurant.getKind}</span>
+			<span class="d-block">${restaurant.getAddress}</span>
 			`);
 
 		cluster.addLayer(marker);
 	}
 
-	// render cluster
+	// 3.2.3 re-render cluster
 	mapBCN.addLayer(cluster);
 
-	// CENTER CLUSTER SETVIEW !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// 3.2.4 reset View <-> centroid coordinates
+	currentCoordinates = []; // reset previous
+
+	for (let restaurant of filtered) {
+		currentCoordinates.push(restaurant.getCoordinates);
+	}
+
+	// current latitudes + longitudes
+	let lats = currentCoordinates.map(cC => cC[0]);
+	let lngs = currentCoordinates.map(cC => cC[1]);
+
+	// new view is centroid of cluster
+	mapBCN.setView(centroid(lats, lngs), mapBCN.zoom);
+}
+
+/* AUX */
+
+function centroid(_lats, _lngs) {
+	return [avg(_lats), avg(_lngs)]; // [int, int]
+}
+
+function avg(coordinates) {
+	let sum = 0; // int
+
+	for (let c of coordinates) {
+		sum += c;
+	}
+
+	return sum / currentCoordinates.length; // average center
 }

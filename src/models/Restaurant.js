@@ -20,15 +20,8 @@ var Restaurant = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
-    Object.defineProperty(Restaurant.prototype, "getId", {
-        // getters
-        get: function () {
-            return this.id;
-        },
-        enumerable: false,
-        configurable: true
-    });
     Object.defineProperty(Restaurant.prototype, "getName", {
+        // getters
         get: function () {
             return this.name;
         },

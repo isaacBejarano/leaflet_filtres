@@ -21,10 +21,6 @@ export default class Restaurant {
 	}
 
 	// getters
-	get getId() {
-		return this.id;
-	}
-
 	get getName() {
 		return this.name;
 	}
