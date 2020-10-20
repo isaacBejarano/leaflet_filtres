@@ -4,7 +4,7 @@
 	"description": "Leaflet map fetching API REST",
 	"private": true,
 	"scripts": {
-		"build": "webpack -p",
+		"build": "webpack",
 		"watch": "webpack --watch"
 	},
 	"keywords": [],
