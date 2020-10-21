@@ -48,20 +48,29 @@ function onMapLoad() {
 				restaurants = Restaurant.getList;
 
 				// 3.1.2 dynamic <select>
-				let inputSelect = document.getElementById("kind_food_selector");
-				let kinds = new Set(); // don't repeat kinds
+				let foodTags = [];
+				let kinds = new Set(); // don't repeat foodTags
 
+				// get all foodTags and excude duplicated
 				for (let restaurant of Restaurant.getList) {
-					kinds.add(restaurant.getKind);
+					foodTags.push(...restaurant.getKind.split(","));
+				}
+
+				for (let tag of foodTags) {
+					kinds.add(tag);
 				}
 
 				for (let kind of kinds.keys()) {
-					// HTML append
+					const inputSelect = document.getElementById("kind_food_selector");
 					const option = document.createElement("option");
+
+					// HTML append
 					inputSelect.append(option);
+
 					// data inject
 					option.value = kind;
 					option.textContent = kind;
+
 					// CSS
 					option.classList.add("bg-dark", "text-light", "font-weight-lighter");
 				}
@@ -102,12 +111,20 @@ function render_to_map(filtro) {
 
 	// 3.2.2 filter restaurants + update cluster of markers
 	if (filtro === "all") filtered = restaurants;
-	else filtered = restaurants.filter(data => data.getKind === filtro);
+	else {
+		for (let restaurant of restaurants) {
+			let kindsPerRestaurant = restaurant.getKind.split(",");
+			let filtering = kindsPerRestaurant.filter(kind => kind === filtro);
 
+			if (filtering.length > 0) filtered.push(restaurant);
+		}
+	}
+
+	// mark on "all" or filtred
 	for (let restaurant of filtered) {
 		let marker = L.marker(restaurant.getCoordinates).bindPopup(`
 			<b class="d-block">${restaurant.getName}</b>
-			<span class="d-block  pb-2">${restaurant.getKind}</span>
+			<span class="d-block  pb-2">${restaurant.getKind.replace(',',', ')}</span>
 			<span class="d-block">${restaurant.getAddress}</span>
 			`);
 
