@@ -122,9 +122,10 @@ function render_to_map(filtro) {
 
 	// mark on "all" or filtred
 	for (let restaurant of filtered) {
+		let regex = new RegExp(/,/g);
 		let marker = L.marker(restaurant.getCoordinates).bindPopup(`
 			<b class="d-block">${restaurant.getName}</b>
-			<span class="d-block  pb-2">${restaurant.getKind.replace(',',', ')}</span>
+			<span class="d-block  pb-2">${restaurant.getKind.replace(regex, ", ")}</span>
 			<span class="d-block">${restaurant.getAddress}</span>
 			`);
 
